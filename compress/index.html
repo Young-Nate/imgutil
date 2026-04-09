@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Free Image Compressor — Reduce Image Size Up to 90% | Pixl</title>
+  <meta name="description" content="Free browser-based image compressor. Reduce JPG, PNG, and WebP file size by up to 90% without losing quality. No uploads — runs entirely in your browser." />
+  <link rel="canonical" href="https://imgutil-five.vercel.app/compress/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://imgutil-five.vercel.app/compress/" />
+  <meta property="og:site_name" content="Pixl" />
+  <meta property="og:title" content="Free Image Compressor — Reduce Image Size Up to 90% | Pixl" />
+  <meta property="og:description" content="Free browser-based image compressor. Reduce JPG, PNG, and WebP file size by up to 90% without losing quality. No uploads — runs entirely in your browser." />
+  <meta property="og:image" content="https://imgutil-five.vercel.app/og-image.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://imgutil-five.vercel.app/compress/" />
+  <meta name="twitter:title" content="Free Image Compressor — Reduce Image Size Up to 90% | Pixl" />
+  <meta name="twitter:description" content="Free browser-based image compressor. Reduce JPG, PNG, and WebP file size by up to 90% without losing quality. No uploads — runs entirely in your browser." />
+  <meta name="twitter:image" content="https://imgutil-five.vercel.app/og-image.png" />
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Pixl Image Compressor",
+    "url": "https://imgutil-five.vercel.app/compress/",
+    "applicationCategory": "GraphicsApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Free browser-based image compressor. Reduce JPG, PNG, and WebP file size by up to 90% without losing quality. No uploads required.",
+    "featureList": [
+      "Compress JPG, PNG, WebP images",
+      "Reduce file size up to 90%",
+      "No uploads — 100% local processing",
+      "Adjustable quality slider"
+    ]
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='url(%23g)'/><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%236366f1'/><stop offset='1' stop-color='%238b5cf6'/></linearGradient></defs><path d='M10 22 L14 14 L18 18 L21 12' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/><circle cx='22' cy='10' r='2' fill='white'/></svg>" />
+  <style>
+    /* ── Tool page overrides ── */
+    .tool-accent { --accent: #6366f1; --accent-hover: #4f46e5; --accent-light: #eef2ff; }
+
+    /* Upload zone */
+    .upload-zone {
+      border: 2px dashed var(--border-dark);
+      border-radius: var(--radius-xl);
+      padding: 56px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s;
+      background: var(--surface);
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: #6366f1;
+      background: #eef2ff;
+    }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-icon {
+      width: 52px; height: 52px; margin: 0 auto 16px;
+      background: #eef2ff; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      color: #6366f1;
+    }
+    .upload-zone h2 { font-size: var(--text-lg); font-weight: 600; margin-bottom: 6px; }
+    .upload-zone p { color: var(--text-muted); font-size: var(--text-sm); }
+    .upload-zone .formats { display: flex; gap: 6px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+    .format-badge { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 3px 10px; font-size: var(--text-xs); font-weight: 600; color: var(--text-muted); }
+
+    /* Tool body */
+    .tool-body { display: none; }
+    .tool-body.active { display: block; }
+
+    /* Controls */
+    .controls-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .controls-row { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+    .control-group { flex: 1; min-width: 200px; }
+    .control-label { font-size: var(--text-sm); font-weight: 600; color: var(--text); margin-bottom: 10px; display: flex; justify-content: space-between; }
+    .quality-value { color: #6366f1; font-weight: 700; }
+
+    input[type="range"] {
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 6px; border-radius: 3px;
+      background: var(--border);
+      outline: none; cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #6366f1; cursor: pointer;
+      box-shadow: 0 0 0 3px #eef2ff;
+    }
+
+    select.format-select {
+      width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+      border-radius: var(--radius); background: white; color: var(--text);
+      font-size: var(--text-sm); font-weight: 500; cursor: pointer; outline: none;
+    }
+    select.format-select:focus { border-color: #6366f1; box-shadow: 0 0 0 3px #eef2ff; }
+
+    /* Preview */
+    .preview-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;
+    }
+    @media (max-width: 600px) { .preview-grid { grid-template-columns: 1fr; } }
+    .preview-box {
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      overflow: hidden; background: var(--surface);
+    }
+    .preview-label {
+      padding: 10px 16px; font-size: var(--text-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);
+      border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
+    }
+    .preview-label .size-badge {
+      font-weight: 700; font-size: var(--text-xs); padding: 2px 8px;
+      border-radius: 20px; background: var(--border);
+    }
+    .size-badge.savings { background: #d1fae5; color: #065f46; }
+    .preview-img-wrap { padding: 16px; background: repeating-conic-gradient(#ddd 0% 25%, white 0% 50%) 0 0 / 16px 16px; min-height: 180px; display: flex; align-items: center; justify-content: center; }
+    .preview-img-wrap img { max-height: 280px; object-fit: contain; border-radius: 4px; }
+
+    /* Action bar */
+    .action-bar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .btn-compress {
+      background: #6366f1; color: white; border-radius: var(--radius);
+      padding: 12px 28px; font-size: var(--text-sm); font-weight: 700;
+      transition: background 0.15s, transform 0.1s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .btn-compress:hover { background: #4f46e5; }
+    .btn-compress:active { transform: scale(0.98); }
+    .btn-compress:disabled { background: var(--border-dark); cursor: not-allowed; }
+    .btn-download {
+      background: #10b981; color: white; border-radius: var(--radius);
+      padding: 12px 28px; font-size: var(--text-sm); font-weight: 700;
+      transition: background 0.15s; display: none; align-items: center; gap: 8px;
+    }
+    .btn-download.visible { display: flex; }
+    .btn-download:hover { background: #059669; }
+    .btn-reset {
+      background: white; color: var(--text-muted); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 12px 20px; font-size: var(--text-sm); font-weight: 600;
+      transition: border-color 0.15s;
+    }
+    .btn-reset:hover { border-color: var(--text-muted); color: var(--text); }
+
+    /* Progress */
+    .progress-bar-wrap { display: none; margin-bottom: 16px; }
+    .progress-bar-wrap.active { display: block; }
+    .progress-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: #6366f1; border-radius: 3px; transition: width 0.3s; width: 0%; }
+    .progress-label { font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 6px; }
+
+    /* Ad slots */
+    .ad-banner {
+      background: var(--surface-2); border: 1px dashed var(--border);
+      border-radius: var(--radius); padding: 16px; text-align: center;
+      color: var(--text-faint); font-size: var(--text-xs);
+      margin: 24px 0; min-height: 90px; display: flex; align-items: center; justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">
+        <div class="logo-mark">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </div>
+        <span class="logo-text">Pix<span>l</span></span>
+      </a>
+      <nav class="header-nav">
+        <a href="index.html" class="nav-link active">Compress</a>
+        <a href="../upscale/index.html" class="nav-link">Upscale</a>
+        <a href="../removebg/index.html" class="nav-link">Remove BG</a>
+        <a href="../convert/index.html" class="nav-link">Convert</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="tool-hero compress">
+    <div class="container-sm">
+      <div class="tool-hero-badge">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="21" y2="3"/><line x1="3" y1="21" x2="14" y2="10"/></svg>
+        Image Compressor
+      </div>
+      <h1>Compress Image Online — Free, Fast & Private</h1>
+      <p class="tool-hero-sub">Reduce JPG, PNG, and WebP file sizes by up to 90% with a single click. No upload to any server — everything runs in your browser using Canvas API.</p>
+    </div>
+  </div>
+
+  <section class="tool-section">
+    <div class="container-sm">
+
+      <!-- Ad banner top -->
+      <div class="ad-banner" id="ad-top">Advertisement</div>
+
+      <!-- Upload zone -->
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" multiple />
+        <div class="upload-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <h2>Drop your image here</h2>
+        <p>or click to browse files</p>
+        <div class="formats">
+          <span class="format-badge">JPG</span>
+          <span class="format-badge">PNG</span>
+          <span class="format-badge">WebP</span>
+        </div>
+      </div>
+
+      <!-- Tool body (shown after file selected) -->
+      <div class="tool-body" id="toolBody">
+        <!-- Controls -->
+        <div class="controls-panel" style="margin-top:24px;">
+          <div class="controls-row">
+            <div class="control-group">
+              <div class="control-label">
+                Quality
+                <span class="quality-value" id="qualityDisplay">80%</span>
+              </div>
+              <input type="range" id="qualitySlider" min="1" max="100" value="80" />
+            </div>
+            <div class="control-group">
+              <div class="control-label">Output Format</div>
+              <select class="format-select" id="formatSelect">
+                <option value="original">Keep original format</option>
+                <option value="image/jpeg">JPG</option>
+                <option value="image/png">PNG</option>
+                <option value="image/webp">WebP</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-bar-wrap" id="progressWrap">
+          <div class="progress-label" id="progressLabel">Compressing…</div>
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+
+        <!-- Preview -->
+        <div class="preview-grid" id="previewGrid">
+          <div class="preview-box">
+            <div class="preview-label">
+              Original
+              <span class="size-badge" id="origSize">—</span>
+            </div>
+            <div class="preview-img-wrap">
+              <img id="origImg" src="" alt="Original image" />
+            </div>
+          </div>
+          <div class="preview-box">
+            <div class="preview-label">
+              Compressed
+              <span class="size-badge" id="compSize">—</span>
+            </div>
+            <div class="preview-img-wrap">
+              <img id="compImg" src="" alt="Compressed image" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Action bar -->
+        <div class="action-bar">
+          <button class="btn-compress" id="btnCompress">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="21" y2="3"/><line x1="3" y1="21" x2="14" y2="10"/></svg>
+            Compress Image
+          </button>
+          <a class="btn-download" id="btnDownload" download="compressed.jpg">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </a>
+          <button class="btn-reset" id="btnReset">New image</button>
+        </div>
+      </div>
+
+      <!-- Ad banner bottom -->
+      <div class="ad-banner" style="margin-top:32px;" id="ad-bottom">Advertisement</div>
+
+    </div>
+  </section>
+
+  <!-- How to use -->
+  <section class="info-section">
+    <div class="container-sm">
+      <h2 class="section-title">How to Compress an Image</h2>
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Upload your image</strong>
+            <p>Click the upload area or drag and drop a JPG, PNG, or WebP file directly onto it. You can process one image at a time.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Set quality and format</strong>
+            <p>Drag the quality slider — 80% gives an excellent balance of quality and file size for most photos. Choose an output format or keep the original.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Compress and download</strong>
+            <p>Click "Compress Image." The before/after preview shows you the file size savings. When satisfied, click Download to save the compressed file.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section">
+    <div class="container-sm">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>Is my image uploaded to any server?</summary>
+          <p>No. Pixl uses the browser's built-in Canvas API to compress your image entirely on your device. Your file never leaves your computer — not even a byte.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What quality setting should I use?</summary>
+          <p>For photos shared on the web or social media, 75–85% quality is usually ideal — you'll get a 60–80% smaller file with virtually no visible difference. For documents or UI screenshots, 90% is safer. For maximum compression at the cost of some detail, try 50–60%.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Why convert to WebP instead of JPG?</summary>
+          <p>WebP is a modern format designed for the web. It typically produces files 25–35% smaller than JPEG at the same visual quality, and it's supported by all modern browsers. Use WebP for websites and apps where file size matters.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Other tools -->
+  <section class="other-tools-section">
+    <div class="container-sm">
+      <h2 class="section-title">Other Free Image Tools</h2>
+      <div class="tool-links">
+        <a href="../upscale/index.html" class="tool-link-card upscale">
+          <div class="tool-link-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          </div>
+          <div>
+            <strong>AI Image Upscaler</strong>
+            <span>Enlarge images 2× or 4× without blur</span>
+          </div>
+        </a>
+        <a href="../removebg/index.html" class="tool-link-card removebg">
+          <div class="tool-link-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div>
+            <strong>Remove Background</strong>
+            <span>AI background removal, no upload</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© <span id="yr"></span> Pixl — All processing happens in your browser. No data is ever uploaded.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  const uploadZone  = document.getElementById('uploadZone');
+  const fileInput   = document.getElementById('fileInput');
+  const toolBody    = document.getElementById('toolBody');
+  const qualSlider  = document.getElementById('qualitySlider');
+  const qualDisplay = document.getElementById('qualityDisplay');
+  const fmtSelect   = document.getElementById('formatSelect');
+  const origImg     = document.getElementById('origImg');
+  const compImg     = document.getElementById('compImg');
+  const origSize    = document.getElementById('origSize');
+  const compSize    = document.getElementById('compSize');
+  const btnCompress = document.getElementById('btnCompress');
+  const btnDownload = document.getElementById('btnDownload');
+  const btnReset    = document.getElementById('btnReset');
+  const progressWrap= document.getElementById('progressWrap');
+  const progressFill= document.getElementById('progressFill');
+  const progressLbl = document.getElementById('progressLabel');
+
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  let originalFile = null;
+  let originalDataURL = null;
+
+  // Drag & drop
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault(); uploadZone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) handleFile(f);
+  });
+  fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+
+  qualSlider.addEventListener('input', () => {
+    qualDisplay.textContent = qualSlider.value + '%';
+  });
+
+  function formatBytes(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  }
+
+  function handleFile(file) {
+    originalFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      originalDataURL = e.target.result;
+      origImg.src = originalDataURL;
+      origSize.textContent = formatBytes(file.size);
+      compImg.src = '';
+      compSize.textContent = '—';
+      compSize.className = 'size-badge';
+      btnDownload.classList.remove('visible');
+      toolBody.classList.add('active');
+      uploadZone.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  btnCompress.addEventListener('click', () => {
+    if (!originalFile) return;
+    const quality = parseInt(qualSlider.value) / 100;
+    const format = fmtSelect.value;
+
+    // Show progress
+    progressWrap.classList.add('active');
+    progressFill.style.width = '30%';
+    progressLbl.textContent = 'Loading image…';
+    btnCompress.disabled = true;
+
+    const img = new Image();
+    img.onload = () => {
+      progressFill.style.width = '60%';
+      progressLbl.textContent = 'Compressing…';
+
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+
+      // Determine actual MIME type to use
+      let mimeType;
+      if (format === 'original') {
+        mimeType = originalFile.type === 'image/png' ? 'image/png' :
+                   originalFile.type === 'image/webp' ? 'image/webp' : 'image/jpeg';
+      } else {
+        mimeType = format;
+      }
+
+      // PNG doesn't use quality param — use 1 for full quality losslessly
+      const qualParam = mimeType === 'image/png' ? 1 : quality;
+
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          alert('Compression failed. Please try a different image or format.');
+          progressWrap.classList.remove('active');
+          btnCompress.disabled = false;
+          return;
+        }
+
+        progressFill.style.width = '100%';
+        progressLbl.textContent = 'Done!';
+
+        const url = URL.createObjectURL(blob);
+        compImg.src = url;
+
+        const savings = Math.round((1 - blob.size / originalFile.size) * 100);
+        compSize.textContent = formatBytes(blob.size) + (savings > 0 ? ' (-' + savings + '%)' : '');
+        compSize.className = savings > 5 ? 'size-badge savings' : 'size-badge';
+
+        // Set download
+        const ext = mimeType === 'image/jpeg' ? 'jpg' : mimeType === 'image/png' ? 'png' : 'webp';
+        const baseName = (originalFile.name || 'image').replace(/\.[^.]+$/, '');
+        btnDownload.href = url;
+        btnDownload.download = baseName + '-compressed.' + ext;
+        btnDownload.classList.add('visible');
+
+        btnCompress.disabled = false;
+        setTimeout(() => progressWrap.classList.remove('active'), 1200);
+      }, mimeType, qualParam);
+    };
+    img.src = originalDataURL;
+  });
+
+  btnReset.addEventListener('click', () => {
+    originalFile = null; originalDataURL = null;
+    origImg.src = ''; compImg.src = '';
+    origSize.textContent = '—'; compSize.textContent = '—';
+    compSize.className = 'size-badge';
+    btnDownload.classList.remove('visible');
+    toolBody.classList.remove('active');
+    uploadZone.style.display = '';
+    fileInput.value = '';
+    progressWrap.classList.remove('active');
+    progressFill.style.width = '0%';
+  });
+})();
+</script>
+</body>
+</html>

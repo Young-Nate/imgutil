@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Free Background Remover — AI Background Removal | Pixl</title>
+  <meta name="description" content="Free AI background remover. Remove image backgrounds instantly in your browser. 100% local processing — no uploads, no API key needed. Download as PNG." />
+  <link rel="canonical" href="https://imgutil-five.vercel.app/removebg/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://imgutil-five.vercel.app/removebg/" />
+  <meta property="og:site_name" content="Pixl" />
+  <meta property="og:title" content="Free Background Remover — AI Background Removal | Pixl" />
+  <meta property="og:description" content="Free AI background remover. Remove image backgrounds instantly in your browser. 100% local processing — no uploads, no API key needed. Download as PNG." />
+  <meta property="og:image" content="https://imgutil-five.vercel.app/og-image.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://imgutil-five.vercel.app/removebg/" />
+  <meta name="twitter:title" content="Free Background Remover — AI Background Removal | Pixl" />
+  <meta name="twitter:description" content="Free AI background remover. Remove image backgrounds instantly in your browser. 100% local processing — no uploads, no API key needed. Download as PNG." />
+  <meta name="twitter:image" content="https://imgutil-five.vercel.app/og-image.png" />
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Pixl Background Remover",
+    "url": "https://imgutil-five.vercel.app/removebg/",
+    "applicationCategory": "GraphicsApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Free AI background remover. Remove image backgrounds instantly in your browser. 100% local processing — no uploads, no API key needed.",
+    "featureList": [
+      "AI-powered background removal",
+      "100% local — no uploads",
+      "Download as PNG with transparency",
+      "No API key required"
+    ]
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='url(%23g)'/><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%236366f1'/><stop offset='1' stop-color='%238b5cf6'/></linearGradient></defs><path d='M10 22 L14 14 L18 18 L21 12' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/><circle cx='22' cy='10' r='2' fill='white'/></svg>" />
+  <style>
+    :root {
+      --removebg-accent: #10b981;
+      --removebg-hover: #059669;
+      --removebg-light: #d1fae5;
+    }
+
+    .upload-zone {
+      border: 2px dashed var(--border-dark);
+      border-radius: var(--radius-xl);
+      padding: 56px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s;
+      background: var(--surface);
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--removebg-accent);
+      background: var(--removebg-light);
+    }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-icon {
+      width: 52px; height: 52px; margin: 0 auto 16px;
+      background: var(--removebg-light); border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--removebg-accent);
+    }
+    .upload-zone h2 { font-size: var(--text-lg); font-weight: 600; margin-bottom: 6px; }
+    .upload-zone p { color: var(--text-muted); font-size: var(--text-sm); }
+    .upload-zone .formats { display: flex; gap: 6px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+    .format-badge { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 3px 10px; font-size: var(--text-xs); font-weight: 600; color: var(--text-muted); }
+
+    .tool-body { display: none; }
+    .tool-body.active { display: block; }
+
+    /* Background color chooser */
+    .bg-chooser {
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 16px 20px; margin: 24px 0 20px;
+    }
+    .bg-chooser-label { font-size: var(--text-sm); font-weight: 600; margin-right: 4px; }
+    .bg-swatch {
+      width: 32px; height: 32px; border-radius: 8px; border: 2px solid transparent;
+      cursor: pointer; transition: transform 0.12s, border-color 0.12s; flex-shrink: 0;
+    }
+    .bg-swatch:hover { transform: scale(1.1); }
+    .bg-swatch.active { border-color: var(--removebg-accent); box-shadow: 0 0 0 3px var(--removebg-light); }
+    .bg-swatch.transparent { background: repeating-conic-gradient(#bbb 0% 25%, white 0% 50%) 0 0 / 12px 12px; }
+    .bg-swatch-white { background: #ffffff; border: 2px solid var(--border); }
+    .bg-swatch-black { background: #111827; }
+    .bg-color-input { display: flex; align-items: center; gap: 6px; font-size: var(--text-sm); color: var(--text-muted); }
+    .bg-color-input input[type="color"] {
+      width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 8px;
+      cursor: pointer; padding: 2px; background: white;
+    }
+
+    /* Preview comparison */
+    .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    @media (max-width: 600px) { .preview-grid { grid-template-columns: 1fr; } }
+    .preview-box {
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      overflow: hidden; background: var(--surface);
+    }
+    .preview-label {
+      padding: 10px 16px; font-size: var(--text-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .preview-img-wrap {
+      padding: 16px; min-height: 180px;
+      display: flex; align-items: center; justify-content: center; position: relative;
+    }
+    .preview-img-wrap.transparent-bg {
+      background: repeating-conic-gradient(#ddd 0% 25%, white 0% 50%) 0 0 / 16px 16px;
+    }
+    .preview-img-wrap img, .preview-img-wrap canvas {
+      max-height: 280px; max-width: 100%; object-fit: contain; border-radius: 4px;
+    }
+    .canvas-result { display: none; }
+    .canvas-result.visible { display: block; }
+
+    /* Spinner overlay */
+    .spinner-overlay {
+      display: none; position: absolute; inset: 0;
+      background: rgba(255,255,255,0.88); backdrop-filter: blur(2px);
+      flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+    }
+    .spinner-overlay.active { display: flex; }
+    .spinner {
+      width: 36px; height: 36px; border: 3px solid var(--removebg-light);
+      border-top-color: var(--removebg-accent); border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-text { font-size: var(--text-sm); color: var(--text-muted); font-weight: 500; text-align: center; padding: 0 12px; }
+
+    /* Progress */
+    .progress-bar-wrap { display: none; margin-bottom: 16px; }
+    .progress-bar-wrap.active { display: block; }
+    .progress-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--removebg-accent); border-radius: 3px; transition: width 0.4s; width: 0%; }
+    .progress-label { font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 6px; }
+
+    /* Buttons */
+    .action-bar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .btn-removebg {
+      background: var(--removebg-accent); color: white; border-radius: var(--radius);
+      padding: 12px 28px; font-size: var(--text-sm); font-weight: 700;
+      transition: background 0.15s, transform 0.1s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .btn-removebg:hover { background: var(--removebg-hover); }
+    .btn-removebg:active { transform: scale(0.98); }
+    .btn-removebg:disabled { background: var(--border-dark); cursor: not-allowed; }
+    .btn-download {
+      background: #6366f1; color: white; border-radius: var(--radius);
+      padding: 12px 28px; font-size: var(--text-sm); font-weight: 700;
+      transition: background 0.15s; display: none; align-items: center; gap: 8px;
+    }
+    .btn-download.visible { display: flex; }
+    .btn-download:hover { background: #4f46e5; }
+    .btn-reset {
+      background: white; color: var(--text-muted); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 12px 20px; font-size: var(--text-sm); font-weight: 600;
+      transition: border-color 0.15s;
+    }
+    .btn-reset:hover { border-color: var(--text-muted); color: var(--text); }
+
+    /* Model notice */
+    .model-notice {
+      background: #fff7ed; border: 1px solid #fed7aa;
+      border-radius: var(--radius); padding: 12px 16px;
+      font-size: var(--text-sm); color: #92400e;
+      display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+    }
+
+    /* Ad slots */
+    .ad-banner {
+      background: var(--surface-2); border: 1px dashed var(--border);
+      border-radius: var(--radius); padding: 16px; text-align: center;
+      color: var(--text-faint); font-size: var(--text-xs);
+      margin: 24px 0; min-height: 90px; display: flex; align-items: center; justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">
+        <div class="logo-mark">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </div>
+        <span class="logo-text">Pix<span>l</span></span>
+      </a>
+      <nav class="header-nav">
+        <a href="../compress/index.html" class="nav-link">Compress</a>
+        <a href="../upscale/index.html" class="nav-link">Upscale</a>
+        <a href="index.html" class="nav-link active">Remove BG</a>
+        <a href="../convert/index.html" class="nav-link">Convert</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="tool-hero removebg">
+    <div class="container-sm">
+      <div class="tool-hero-badge" style="background:#d1fae5;color:#065f46;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Background Remover
+      </div>
+      <h1>Remove Image Background Free — AI, No Upload</h1>
+      <p class="tool-hero-sub">Automatically remove the background from any photo using AI. Powered by <code>@imgly/background-removal</code> running via WASM/ONNX in your browser. No API key, no server, completely private.</p>
+    </div>
+  </div>
+
+  <section class="tool-section">
+    <div class="container-sm">
+
+      <!-- Ad banner top -->
+      <div class="ad-banner" id="ad-top">Advertisement</div>
+
+      <!-- Model notice -->
+      <div class="model-notice" id="modelNotice">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        The AI model (~40 MB) downloads on first use and is cached in your browser. Processing takes 5–30 seconds depending on image size.
+      </div>
+
+      <!-- Upload zone -->
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" />
+        <div class="upload-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <h2>Drop your image here</h2>
+        <p>Portraits, products, objects — remove any background</p>
+        <div class="formats">
+          <span class="format-badge">JPG</span>
+          <span class="format-badge">PNG</span>
+          <span class="format-badge">WebP</span>
+        </div>
+      </div>
+
+      <!-- Tool body -->
+      <div class="tool-body" id="toolBody">
+
+        <!-- Background color chooser -->
+        <div class="bg-chooser">
+          <span class="bg-chooser-label">Background:</span>
+          <div class="bg-swatch transparent active" data-bg="transparent" title="Transparent" id="swatchTransparent"></div>
+          <div class="bg-swatch bg-swatch-white" data-bg="#ffffff" title="White" id="swatchWhite"></div>
+          <div class="bg-swatch bg-swatch-black" data-bg="#111827" title="Black" id="swatchBlack"></div>
+          <div class="bg-color-input">
+            <label for="bgColorPicker" style="font-size:var(--text-sm);color:var(--text-muted);">Custom:</label>
+            <input type="color" id="bgColorPicker" value="#3b82f6" title="Custom background color" />
+          </div>
+        </div>
+
+        <!-- Previews -->
+        <div class="preview-grid" id="previewGrid">
+          <div class="preview-box">
+            <div class="preview-label">Original</div>
+            <div class="preview-img-wrap">
+              <img id="origImg" src="" alt="Original image" />
+            </div>
+          </div>
+          <div class="preview-box">
+            <div class="preview-label">Background Removed</div>
+            <div class="preview-img-wrap transparent-bg" id="resultWrap">
+              <canvas id="resultCanvas" class="canvas-result"></canvas>
+              <div class="spinner-overlay" id="spinnerOverlay">
+                <div class="spinner"></div>
+                <div class="spinner-text" id="spinnerText">Downloading AI model…<br><span style="font-size:var(--text-xs);opacity:0.7;">(~40 MB, cached after first use)</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-bar-wrap" id="progressWrap">
+          <div class="progress-label" id="progressLabel">Loading model…</div>
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+
+        <!-- Action bar -->
+        <div class="action-bar">
+          <button class="btn-removebg" id="btnRemoveBg">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Remove Background
+          </button>
+          <a class="btn-download" id="btnDownload" download="no-background.png">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download PNG
+          </a>
+          <button class="btn-reset" id="btnReset">New image</button>
+        </div>
+      </div>
+
+      <!-- Ad banner bottom -->
+      <div class="ad-banner" style="margin-top:32px;" id="ad-bottom">Advertisement</div>
+
+    </div>
+  </section>
+
+  <!-- How to use -->
+  <section class="info-section">
+    <div class="container-sm">
+      <h2 class="section-title">How to Remove an Image Background</h2>
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Upload your photo</strong>
+            <p>Drop or select a JPG, PNG, or WebP file. Works best on portraits, product photos, logos, and objects with clear subjects.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Choose a background</strong>
+            <p>Pick transparent (for PNG with no background), white, black, or any custom color. You can change this after processing without re-running the AI.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Remove and download</strong>
+            <p>Click "Remove Background." The AI model runs locally in your browser — the first run downloads the model (~40 MB), which is then cached for instant future use. Download your result as a PNG.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section">
+    <div class="container-sm">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>Is the background removal truly private?</summary>
+          <p>Yes. Pixl uses the open-source <code>@imgly/background-removal</code> library, which runs an ONNX neural network directly in your browser via WebAssembly. Your image data never leaves your device — not even for model inference.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Why is it slow the first time?</summary>
+          <p>The first run downloads the AI model (~40 MB of ONNX weights) from a CDN. This only happens once — the model is cached in your browser's storage. Subsequent uses start immediately. Processing itself takes 5–30 seconds depending on the image resolution and your device's CPU/GPU.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What types of images work best?</summary>
+          <p>The AI excels at portraits, product photography on plain backgrounds, animals, and objects with defined edges. Complex scenes with busy backgrounds or fine hair/fur details may have imperfect edges — but results are typically very good for common use cases like profile photos, e-commerce product shots, and logo isolation.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Other tools -->
+  <section class="other-tools-section">
+    <div class="container-sm">
+      <h2 class="section-title">Other Free Image Tools</h2>
+      <div class="tool-links">
+        <a href="../compress/index.html" class="tool-link-card compress">
+          <div class="tool-link-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="21" y2="3"/><line x1="3" y1="21" x2="14" y2="10"/></svg>
+          </div>
+          <div>
+            <strong>Compress Image</strong>
+            <span>Reduce file size by up to 90%</span>
+          </div>
+        </a>
+        <a href="../upscale/index.html" class="tool-link-card upscale">
+          <div class="tool-link-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          </div>
+          <div>
+            <strong>AI Image Upscaler</strong>
+            <span>Enlarge photos 2× or 4× without blur</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© <span id="yr"></span> Pixl — All processing happens in your browser. No data is ever uploaded.</p>
+  </div>
+</footer>
+
+<!-- @imgly/background-removal via ESM CDN — use dynamic import -->
+<script type="module">
+  import { removeBackground } from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/index.js';
+  window.__removeBackground = removeBackground;
+</script>
+<script>
+(function () {
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  const uploadZone    = document.getElementById('uploadZone');
+  const fileInput     = document.getElementById('fileInput');
+  const toolBody      = document.getElementById('toolBody');
+  const origImg       = document.getElementById('origImg');
+  const resultCanvas  = document.getElementById('resultCanvas');
+  const resultWrap    = document.getElementById('resultWrap');
+  const btnRemoveBg   = document.getElementById('btnRemoveBg');
+  const btnDownload   = document.getElementById('btnDownload');
+  const btnReset      = document.getElementById('btnReset');
+  const spinnerOverlay= document.getElementById('spinnerOverlay');
+  const spinnerText   = document.getElementById('spinnerText');
+  const progressWrap  = document.getElementById('progressWrap');
+  const progressFill  = document.getElementById('progressFill');
+  const progressLabel = document.getElementById('progressLabel');
+  const bgColorPicker = document.getElementById('bgColorPicker');
+
+  let currentFile = null;
+  let currentFileURL = null;
+  let resultBlob = null;
+  let activeBg = 'transparent';
+  let lastMaskBlob = null; // store the transparent PNG blob so we can re-composite with new BG
+
+  // Swatch handlers
+  document.querySelectorAll('.bg-swatch').forEach(s => {
+    s.addEventListener('click', () => {
+      document.querySelectorAll('.bg-swatch').forEach(x => x.classList.remove('active'));
+      s.classList.add('active');
+      activeBg = s.dataset.bg;
+      if (lastMaskBlob) applyBackground(lastMaskBlob);
+    });
+  });
+  bgColorPicker.addEventListener('input', () => {
+    document.querySelectorAll('.bg-swatch').forEach(x => x.classList.remove('active'));
+    activeBg = bgColorPicker.value;
+    if (lastMaskBlob) applyBackground(lastMaskBlob);
+  });
+
+  // Drag & drop
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault(); uploadZone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) handleFile(f);
+  });
+  fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+
+  function handleFile(file) {
+    currentFile = file;
+    if (currentFileURL) URL.revokeObjectURL(currentFileURL);
+    currentFileURL = URL.createObjectURL(file);
+    origImg.src = currentFileURL;
+    resultCanvas.classList.remove('visible');
+    lastMaskBlob = null;
+    btnDownload.classList.remove('visible');
+    toolBody.classList.add('active');
+    uploadZone.style.display = 'none';
+  }
+
+  function applyBackground(maskBlob) {
+    const img = new Image();
+    img.onload = () => {
+      resultCanvas.width = img.naturalWidth;
+      resultCanvas.height = img.naturalHeight;
+      const ctx = resultCanvas.getContext('2d');
+      ctx.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
+
+      if (activeBg !== 'transparent') {
+        ctx.fillStyle = activeBg;
+        ctx.fillRect(0, 0, resultCanvas.width, resultCanvas.height);
+      }
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(img.src);
+
+      resultCanvas.classList.add('visible');
+
+      // Update preview background
+      if (activeBg === 'transparent') {
+        resultWrap.style.background = '';
+        resultWrap.classList.add('transparent-bg');
+      } else {
+        resultWrap.classList.remove('transparent-bg');
+        resultWrap.style.background = activeBg;
+      }
+
+      // Update download
+      resultCanvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const baseName = (currentFile.name || 'image').replace(/\.[^.]+$/, '');
+        btnDownload.href = url;
+        btnDownload.download = baseName + '-no-bg.png';
+        btnDownload.classList.add('visible');
+      }, 'image/png');
+    };
+    img.src = URL.createObjectURL(maskBlob);
+  }
+
+  btnRemoveBg.addEventListener('click', async () => {
+    if (!currentFile) return;
+
+    // Wait for the module to load
+    let attempts = 0;
+    while (!window.__removeBackground && attempts < 30) {
+      await new Promise(r => setTimeout(r, 300));
+      attempts++;
+    }
+    if (!window.__removeBackground) {
+      alert('The background removal library failed to load. Please check your internet connection and try refreshing.');
+      return;
+    }
+
+    btnRemoveBg.disabled = true;
+    spinnerOverlay.classList.add('active');
+    spinnerText.innerHTML = 'Downloading AI model…<br><span style="font-size:var(--text-xs);opacity:0.7;">(~40 MB, cached after first use)</span>';
+    progressWrap.classList.add('active');
+    progressFill.style.width = '5%';
+    progressLabel.textContent = 'Loading model…';
+
+    try {
+      const config = {
+        debug: false,
+        progress: (key, current, total) => {
+          if (total > 0) {
+            const pct = Math.round((current / total) * 80) + 5;
+            progressFill.style.width = pct + '%';
+            if (key && key.includes('fetch')) {
+              spinnerText.innerHTML = 'Downloading AI model…<br><span style="font-size:var(--text-xs);opacity:0.7;">(cached after first download)</span>';
+            } else {
+              spinnerText.textContent = 'Running AI inference…';
+              progressLabel.textContent = 'Removing background…';
+            }
+          }
+        },
+      };
+
+      const blob = await window.__removeBackground(currentFile, config);
+      lastMaskBlob = blob;
+
+      progressFill.style.width = '95%';
+      progressLabel.textContent = 'Rendering…';
+      spinnerText.textContent = 'Rendering result…';
+
+      applyBackground(blob);
+
+      progressFill.style.width = '100%';
+      progressLabel.textContent = 'Done!';
+
+    } catch (err) {
+      console.error(err);
+      alert('Background removal failed: ' + (err.message || 'Unknown error') + '\n\nTry a smaller image or a different format.');
+    }
+
+    spinnerOverlay.classList.remove('active');
+    btnRemoveBg.disabled = false;
+    setTimeout(() => progressWrap.classList.remove('active'), 1500);
+  });
+
+  btnReset.addEventListener('click', () => {
+    currentFile = null;
+    if (currentFileURL) { URL.revokeObjectURL(currentFileURL); currentFileURL = null; }
+    origImg.src = '';
+    resultCanvas.classList.remove('visible');
+    lastMaskBlob = null;
+    btnDownload.classList.remove('visible');
+    toolBody.classList.remove('active');
+    uploadZone.style.display = '';
+    fileInput.value = '';
+    progressWrap.classList.remove('active');
+    progressFill.style.width = '0%';
+    resultWrap.style.background = '';
+    resultWrap.classList.add('transparent-bg');
+    // Reset swatches
+    document.querySelectorAll('.bg-swatch').forEach(s => s.classList.remove('active'));
+    document.getElementById('swatchTransparent').classList.add('active');
+    activeBg = 'transparent';
+  });
+})();
+</script>
+</body>
+</html>
