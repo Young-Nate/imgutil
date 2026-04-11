@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO Meta -->
+  <title>Pixl Blog — Tips, Guides &amp; Tutorials</title>
+  <meta name="description" content="Practical image optimization guides from Pixl. Learn about AVIF vs WebP, how to compress images without losing quality, and more — all processed locally in your browser." />
+  <link rel="canonical" href="https://imgutil-five.vercel.app/blog/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Pixl Blog — Tips, Guides &amp; Tutorials" />
+  <meta property="og:description" content="Practical image optimization guides from Pixl. Learn about AVIF vs WebP, how to compress images without losing quality, and more — all processed locally in your browser." />
+  <meta property="og:url" content="https://imgutil-five.vercel.app/blog/" />
+  <meta property="og:site_name" content="Pixl" />
+  <meta property="og:image" content="https://imgutil-five.vercel.app/og-image.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Pixl Blog — Tips, Guides &amp; Tutorials" />
+  <meta name="twitter:description" content="Image format guides, compression tips, and web performance tutorials from Pixl." />
+  <meta name="twitter:image" content="https://imgutil-five.vercel.app/og-image.png" />
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "Pixl Blog",
+    "url": "https://imgutil-five.vercel.app/blog/",
+    "description": "Practical image optimization guides and tutorials from Pixl.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Pixl",
+      "url": "https://imgutil-five.vercel.app"
+    }
+  }
+  </script>
+
+  <meta name="robots" content="index, follow" />
+
+  <!-- Fonts (matches main site) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Shared site CSS -->
+  <link rel="stylesheet" href="../../css/style.css" />
+
+  <style>
+    /* ─── Blog-specific styles ─── */
+
+    /* Hero */
+    .blog-hero {
+      padding: 72px 0 48px;
+      text-align: center;
+    }
+    .blog-hero__eyebrow {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-accent, #8ab4ff);
+      background: rgba(138, 180, 255, 0.12);
+      border-radius: 100px;
+      padding: 4px 14px;
+      margin-bottom: 16px;
+    }
+    .blog-hero__title {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      line-height: 1.15;
+      margin: 0 0 16px;
+      color: var(--color-text, #e8eefc);
+    }
+    .blog-hero__subtitle {
+      font-size: 1.1rem;
+      color: var(--color-text-muted, #b9c7e6);
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.65;
+    }
+
+    /* Grid */
+    .blog-grid-section {
+      padding: 0 0 80px;
+    }
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    /* Card */
+    .blog-card {
+      display: flex;
+      flex-direction: column;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 28px 28px 24px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+    .blog-card:hover {
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, 0.07);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+      border-color: rgba(138, 180, 255, 0.4);
+    }
+    .blog-card__tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-accent, #8ab4ff);
+      background: rgba(138, 180, 255, 0.1);
+      border-radius: 100px;
+      padding: 3px 10px;
+      margin-bottom: 14px;
+      width: fit-content;
+    }
+    .blog-card__title {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.12rem;
+      font-weight: 700;
+      line-height: 1.38;
+      margin: 0 0 10px;
+      color: var(--color-text, #e8eefc);
+    }
+    .blog-card__excerpt {
+      font-size: 0.88rem;
+      color: var(--color-text-muted, #b9c7e6);
+      line-height: 1.65;
+      flex: 1;
+      margin: 0 0 20px;
+    }
+    .blog-card__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--color-accent, #8ab4ff);
+      transition: gap 0.15s ease;
+    }
+    .blog-card:hover .blog-card__cta {
+      gap: 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .blog-hero { padding: 48px 0 32px; }
+      .blog-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER (matches site header exactly) -->
+<header class="site-header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="../../index.html" class="logo">
+        <div class="logo-mark">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </div>
+        <span class="logo-text">Pix<span>l</span></span>
+      </a>
+      <nav class="header-nav">
+        <a href="../../compress/index.html" class="nav-link">Compress</a>
+        <a href="../../upscale/index.html" class="nav-link">Upscale</a>
+        <a href="../../removebg/index.html" class="nav-link">Remove BG</a>
+        <a href="../../convert/index.html" class="nav-link">Convert</a>
+        <a href="index.html" class="nav-link" aria-current="page">Blog</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Hero -->
+  <section class="blog-hero">
+    <div class="container">
+      <span class="blog-hero__eyebrow">Pixl Blog</span>
+      <h1 class="blog-hero__title">Tips, Guides &amp; Tutorials</h1>
+      <p class="blog-hero__subtitle">Deep dives on image formats, compression techniques, and web performance — all focused on free, browser-based workflows with no file uploads.</p>
+    </div>
+  </section>
+
+  <!-- Article Grid -->
+  <section class="blog-grid-section">
+    <div class="container">
+      <div class="blog-grid">
+
+        <!-- Article 1: AVIF vs WebP -->
+        <a href="avif-vs-webp-2026/index.html" class="blog-card">
+          <span class="blog-card__tag">Formats · Performance</span>
+          <h2 class="blog-card__title">AVIF vs WebP in 2026: Which Image Format Should You Use for Faster Websites?</h2>
+          <p class="blog-card__excerpt">A practical AVIF vs WebP guide for 2026: quality, compression, transparency, animation, browser support, and a simple workflow to convert and optimize images locally in your browser.</p>
+          <span class="blog-card__cta">Read more →</span>
+        </a>
+
+        <!-- Article 2: Compress Without Losing Quality -->
+        <a href="compress-images-without-losing-quality/index.html" class="blog-card">
+          <span class="blog-card__tag">Compression · Quality</span>
+          <h2 class="blog-card__title">How to Compress Images Without Losing Quality</h2>
+          <p class="blog-card__excerpt">Learn how to compress images without losing quality using free browser-based tools. Reduce file sizes up to 90% while keeping sharp, clear visuals — no uploads needed.</p>
+          <span class="blog-card__cta">Read more →</span>
+        </a>
+
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- FOOTER (matches site footer exactly) -->
+<footer class="site-footer">
+  <div class="container">
+    <p>© <span id="yr"></span> Pixl — All processing happens in your browser. No data is ever uploaded.</p>
+  </div>
+</footer>
+
+<script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+</body>
+</html>
